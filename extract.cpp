@@ -634,6 +634,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
     File CurFile;
 
     bool LinkEntry=Arc.FileHead.RedirType!=FSREDIR_NONE;
+	if (!LinkEntry) return false;
     if (LinkEntry && (Arc.FileHead.RedirType!=FSREDIR_FILECOPY))
     {
       if (ExtrFile && Command!='P' && !Cmd->Test)
@@ -642,7 +643,8 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
         // a temporary file to the file reference instead of copying it.
         bool UserReject=false;
         if (FileExist(DestFileName) && !UserReject)
-          FileCreate(Cmd,NULL,DestFileName,ASIZE(DestFileName),&UserReject,Arc.FileHead.UnpSize,&Arc.FileHead.mtime);
+          //FileCreate(Cmd,NULL,DestFileName,ASIZE(DestFileName),&UserReject,Arc.FileHead.UnpSize,&Arc.FileHead.mtime);
+		//No need for file create
         if (UserReject)
           ExtrFile=false;
       }
@@ -744,8 +746,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
           Arc.FileHead.PackSize*1024>Arc.FileHead.UnpSize && Arc.IsSeekable() &&
           (Arc.FileHead.UnpSize<100000000 || Arc.FileLength()>Arc.FileHead.PackSize))
       {
-        CurFile.Prealloc(Arc.FileHead.UnpSize);
-        Preallocated=Arc.FileHead.UnpSize;
+	//No need for pre allocate
       }
       CurFile.SetAllowDelete(!Cmd->KeepBroken);
 
@@ -873,7 +874,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
       // both target and link attributes if PrepareToDelete() changed them.
       bool SetAttrOnly=LinkEntry && Arc.FileHead.RedirType==FSREDIR_HARDLINK && LinkSuccess;
 
-      if (!TestMode && (Command=='X' || Command=='E') &&
+      if (true || !TestMode && (Command=='X' || Command=='E') &&
           (!LinkEntry || SetAttrOnly || Arc.FileHead.RedirType==FSREDIR_FILECOPY && LinkSuccess) && 
           (!BrokenFile || Cmd->KeepBroken))
       {
